@@ -1,27 +1,33 @@
-import { $ } from "bun";
+import { $ } from 'bun';
+import { logger } from '@/core/logger';
 
-console.log("[🧹] [build] cleaning up old build...");
+const log = logger.child({ prefix: 'build' });
+
+log.info('cleaning up old build...', { icon: '🧹' });
 
 await $`rm -rf dist`.catch(() =>
-	console.warn("[⚠️] [build] can not remove old build files.."),
+	log.warn('can not remove old build files..', {
+		icon: '⚠️',
+		prefix: 'build',
+	}),
 );
 
-console.log("[📦] [build] building package ...");
+log.warn('building package ...', { icon: '📦' });
 
 const result = await Bun.build({
-	entrypoints: ["./src/index.ts", "./src/cli.ts"],
-	outdir: "./dist",
-	target: "bun",
+	entrypoints: ['./src/index.ts', './src/cli.ts'],
+	outdir: './dist',
+	target: 'bun',
 	splitting: true,
 	minify: true,
 });
 
 if (!result.success) {
-	console.error("[❌] [build] building failed");
+	log.error('building failed', { prefix: 'build' });
 
-	for (const message of result.logs) console.error(message);
+	for (const message of result.logs) log.error(message, { prefix: 'build' });
 
 	process.exit(1);
 }
 
-console.log("[✅] [build] build successful!");
+log.success('build successful!', { icon: '✅' });
