@@ -9,7 +9,7 @@ await $`rm -rf dist`.catch(() =>
 console.log("[📦] [build] building package ...");
 
 const result = await Bun.build({
-	entrypoints: ["./src/index.ts"],
+	entrypoints: ["./src/index.ts", "./src/cli.ts"],
 	outdir: "./dist",
 	target: "bun",
 	splitting: true,
