@@ -1,6 +1,6 @@
 import pc from 'picocolors';
 
-const levels = {
+const LEVELS = {
 	SUCCESS: { icon: '✅', color: pc.green },
 	INFO: { icon: 'ℹ️', color: pc.blue },
 	WARN: { icon: '⚠️', color: pc.yellow },
@@ -8,74 +8,72 @@ const levels = {
 	DEBUG: { icon: '🐞', color: pc.magenta },
 } as const;
 
-type LevelKey = keyof typeof levels;
+export class Logger {
+	constructor(
+		private readonly defaultPrefix = 'kaf-i18n',
+		private readonly bound?: LogOptions,
+	) {}
 
-class Logger {
-	constructor(private defaults: LogOptions = {}) {}
-
-	private getTimestamp(): string {
-		const now = new Date();
-		const hh = String(now.getHours()).padStart(2, '0');
-		const mm = String(now.getMinutes()).padStart(2, '0');
-		const ss = String(now.getSeconds()).padStart(2, '0');
+	private timeStamp(): string {
+		const d = new Date();
+		const hh = String(d.getHours()).padStart(2, '0');
+		const mm = String(d.getMinutes()).padStart(2, '0');
+		const ss = String(d.getSeconds()).padStart(2, '0');
 		return pc.gray(`[${hh}:${mm}:${ss}]`);
 	}
 
-	private stringifyArg(arg: unknown) {
-		if (typeof arg === 'object') return JSON.stringify(arg);
-		return String(arg);
-	}
-
-	private formatMessage(options: LogOptions, args: unknown[]) {
-		const icon = options.icon ?? '';
-		const prefix = options.prefix ? `[${options.prefix.toUpperCase()}] ` : '';
-		const message = args.map((a) => this.stringifyArg(a)).join(' ');
-		return { icon, text: `${prefix}${message}` };
+	private safeStringify(v: unknown) {
+		try {
+			if (typeof v === 'string') return v;
+			if (typeof v === 'object' && v !== null) return JSON.stringify(v);
+			return String(v);
+		} catch {
+			try {
+				return String(v);
+			} catch {
+				return '[unserializable]';
+			}
+		}
 	}
 
 	private shouldLogDebug(): boolean {
-		const bunDebug = typeof Bun !== 'undefined' && Boolean(Bun.env?.DEBUG);
-		return Boolean(process.env.DEBUG) || bunDebug;
+		const bunHasDebug =
+			typeof Bun !== 'undefined' && Boolean((Bun as any).env?.DEBUG);
+		return Boolean(process.env.DEBUG) || bunHasDebug;
 	}
 
-	private log(level: LogLevel, options: LogOptions = {}, ...args: unknown[]) {
-		const { text } = this.formatMessage(options, args);
+	private mergedOptions(callOpts?: LogOptions): LogOptions {
+		return { ...(this.bound ?? {}), ...(callOpts ?? {}) };
+	}
+
+	private output(level: LogLevel, opts: LogOptions, ...args: unknown[]) {
+		if (level === LEVELS.DEBUG && !this.shouldLogDebug()) return;
+		const merged = this.mergedOptions(opts);
+		const prefix =
+			merged.prefix === undefined ? this.defaultPrefix : merged.prefix;
+		const prefixStr = prefix ? `[${prefix.toUpperCase()}] ` : '';
+		const icon = merged.icon ?? level.icon;
+		const msg = args.map((a) => this.safeStringify(a)).join(' ');
 		console.log(
-			`${this.getTimestamp()} [${options.icon ?? level.icon}] ${level.color(text)}`,
+			`${this.timeStamp()} [${icon}] ${level.color(prefixStr + msg)}`,
 		);
 	}
 
-	private isLogOptions(obj: unknown): obj is LogOptions {
-		return (
-			typeof obj === 'object' &&
-			obj !== null &&
-			('icon' in obj || 'prefix' in obj)
-		);
-	}
+	public info = (m: unknown, o?: LogOptions) =>
+		this.output(LEVELS.INFO, o ?? {}, m);
+	public success = (m: unknown, o?: LogOptions) =>
+		this.output(LEVELS.SUCCESS, o ?? {}, m);
+	public warn = (m: unknown, o?: LogOptions) =>
+		this.output(LEVELS.WARN, o ?? {}, m);
+	public error = (m: unknown, o?: LogOptions) =>
+		this.output(LEVELS.ERROR, o ?? {}, m);
+	public debug = (m: unknown, o?: LogOptions) =>
+		this.output(LEVELS.DEBUG, o ?? {}, m);
 
-	private makeMethod(levelKey: LevelKey, conditional?: () => boolean) {
-		const level = levels[levelKey];
-		return (message: unknown, opts?: LogOptions) => {
-			if (conditional && !conditional()) return;
-			const options = opts && this.isLogOptions(opts) ? opts : {};
-			this.log(level, options, message);
-		};
+	public child(options: LogOptions) {
+		const merged = { ...(this.bound ?? {}), ...(options ?? {}) };
+		return new Logger(this.defaultPrefix, merged);
 	}
-
-	private buildOpts(local?: LogOptions) {
-		return { ...this.defaults, ...(local ?? {}) } as LogOptions;
-	}
-
-	public child(opts: LogOptions) {
-		return new Logger(this.buildOpts(opts));
-	}
-
-	// public methods
-	info = this.makeMethod('INFO');
-	success = this.makeMethod('SUCCESS');
-	warn = this.makeMethod('WARN');
-	error = this.makeMethod('ERROR');
-	debug = this.makeMethod('DEBUG', () => this.shouldLogDebug());
 }
 
 export const logger = new Logger();
