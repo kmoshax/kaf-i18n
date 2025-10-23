@@ -1,0 +1,31 @@
+{
+	"name": "kaf-i18n",
+	"version": "0.0.1",
+	"description": "a modern, type-safe, and easy to use i18n management tool with a web ui.",
+	"author": "kmoshax",
+	"license": "MIT",
+	"main": "dist/cli.js",
+	"module": "index.ts",
+	"type": "module",
+	"bin": {
+		"kaf-i18n": "dist/cli.js"
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "bun run src/cli.ts",
+		"build": "bun run build.ts",
+		"prepublishOnly": "bun run build"
+	},
+	"dependencies": {
+		"hono": "^4.10.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.7",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}
