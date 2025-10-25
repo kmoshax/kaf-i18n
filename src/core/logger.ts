@@ -38,37 +38,37 @@ export class Logger {
 
 	private shouldLogDebug(): boolean {
 		const bunHasDebug =
-			typeof Bun !== 'undefined' && Boolean((Bun as any).env?.DEBUG);
+			typeof Bun !== 'undefined' && Boolean((Bun).env?.DEBUG);
 		return Boolean(process.env.DEBUG) || bunHasDebug;
 	}
 
-	private mergedOptions(callOpts?: LogOptions): LogOptions {
-		return { ...(this.bound ?? {}), ...(callOpts ?? {}) };
+	private mergedOptions(callOptions?: LogOptions): LogOptions {
+		return { ...(this.bound ?? {}), ...(callOptions ?? {}) };
 	}
 
-	private output(level: LogLevel, opts: LogOptions, ...args: unknown[]) {
+	private output(level: LogLevel, options: LogOptions, ...args: unknown[]) {
 		if (level === LEVELS.DEBUG && !this.shouldLogDebug()) return;
-		const merged = this.mergedOptions(opts);
+		const merged = this.mergedOptions(options);
 		const prefix =
 			merged.prefix === undefined ? this.defaultPrefix : merged.prefix;
 		const prefixStr = prefix ? `[${prefix.toUpperCase()}] ` : '';
 		const icon = merged.icon ?? level.icon;
-		const msg = args.map((a) => this.safeStringify(a)).join(' ');
+		const message = args.map((a) => this.safeStringify(a)).join(' ');
 		console.log(
-			`${this.timeStamp()} [${icon}] ${level.color(prefixStr + msg)}`,
+			`${this.timeStamp()} [${icon}] ${level.color(prefixStr + message)}`,
 		);
 	}
 
-	public info = (m: unknown, o?: LogOptions) =>
-		this.output(LEVELS.INFO, o ?? {}, m);
-	public success = (m: unknown, o?: LogOptions) =>
-		this.output(LEVELS.SUCCESS, o ?? {}, m);
-	public warn = (m: unknown, o?: LogOptions) =>
-		this.output(LEVELS.WARN, o ?? {}, m);
-	public error = (m: unknown, o?: LogOptions) =>
-		this.output(LEVELS.ERROR, o ?? {}, m);
-	public debug = (m: unknown, o?: LogOptions) =>
-		this.output(LEVELS.DEBUG, o ?? {}, m);
+	public info = (message: unknown, options?: LogOptions) =>
+		this.output(LEVELS.INFO, options ?? {}, message);
+	public success = (message: unknown, options?: LogOptions) =>
+		this.output(LEVELS.SUCCESS, options ?? {}, message);
+	public warn = (message: unknown, options?: LogOptions) =>
+		this.output(LEVELS.WARN, options ?? {}, message);
+	public error = (message: unknown, options?: LogOptions) =>
+		this.output(LEVELS.ERROR, options ?? {}, message);
+	public debug = (message: unknown, options?: LogOptions) =>
+		this.output(LEVELS.DEBUG, options ?? {}, message);
 
 	public child(options: LogOptions) {
 		const merged = { ...(this.bound ?? {}), ...(options ?? {}) };
