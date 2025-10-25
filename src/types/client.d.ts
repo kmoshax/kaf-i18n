@@ -8,3 +8,8 @@ interface AppState {
 	isSaving: boolean;
 	baseLang: string;
 }
+
+interface InitialPayload {
+	locales: LocaleData;
+	baseLang: string;
+}
