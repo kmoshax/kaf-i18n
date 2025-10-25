@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const CONFIG_FILE = '.kaf-i18n.json';
 
-export const readConfig = async () => {
+export const readConfig = async (): Promise<Config | null> => {
 	const configPath = path.join(process.cwd(), CONFIG_FILE);
 	const content = await fs.readFile(configPath, 'utf-8');
 
