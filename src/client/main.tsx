@@ -1,5 +1,6 @@
 import { render } from 'hono/jsx/dom';
 
+import { showAddKeyModal } from './components/add-key-modal';
 import { HeaderComponent } from './components/header';
 import { TranslationTable } from './components/translation-table';
 import { getState, initializeState, subscribe, updateState } from './state';
@@ -15,6 +16,18 @@ initializeState(initialData);
 
 const headerContainer = document.getElementById('header-container');
 const mainContentContainer = document.getElementById('main-content');
+
+const handleAddKey = (newKey: string) => {
+  const { locales, baseLang } = getState();
+  if (newKey && !locales[baseLang]?.[newKey]) {
+    pushToUndoStack(locales);
+    const newLocales = JSON.parse(JSON.stringify(locales));
+    Object.keys(newLocales).forEach(lang => {
+      newLocales[lang][newKey] = '';
+    });
+    updateState({ locales: newLocales });
+  } else if (newKey) { alert('Key already exists.'); }
+}
 
 const handleValueChange = (key: string, lang: string, value: string) => {
   const currentLocales = getState().locales;
@@ -32,7 +45,7 @@ subscribe((state) => {
 		<HeaderComponent
 			state={state}
 			onSearch={(query) => updateState({ searchQuery: query })}
-			onAddKey={() => {/* TODO */ }}
+			onAddKey={() => showAddKeyModal(handleAddKey)}
 			onUndo={undo}
 			onRedo={redo}
 		/>,
