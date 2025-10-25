@@ -23,9 +23,9 @@ const result = await Bun.build({
 });
 
 if (!result.success) {
-	log.error('building failed', { prefix: 'build' });
+	log.error('building failed', { icon: '❌' });
 
-	for (const message of result.logs) log.error(message, { prefix: 'build' });
+	for (const message of result.logs) log.error(message);
 
 	process.exit(1);
 }

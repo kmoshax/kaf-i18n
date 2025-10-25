@@ -18,9 +18,10 @@ cli
 			fetch: server.fetch,
 		});
 
-		logger.success(`Web UI is running at http://localhost:${options.port}`, {
-			icon: '🎉',
-		});
+		logger.success(
+			`Web UI is running at http://localhost:${options.port} in ${process.env.NODE_ENV} mode`,
+			{ icon: '🎉' },
+		);
 	});
 
 cli.help();
