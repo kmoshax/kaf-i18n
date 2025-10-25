@@ -21,7 +21,7 @@ cli
 		let config = await readConfig();
 		let localesPath = config?.baseLang;
 
-		if (!localesPath) {
+		if (!localesPath || !existsSync(localesPath)) {
 			localesPath = (await findLocalesPath()) || undefined;
 
 			if (localesPath) {
@@ -43,6 +43,7 @@ cli
 
 				if (!path || !existsSync(path)) {
 					logger.error('Invalid path. Exiting.');
+					process.exit(1);
 				}
 
 				const updatedConfig = { ...config, localesPath: path };

@@ -5,6 +5,10 @@ const CONFIG_FILE = '.kaf-i18n.json';
 
 export const readConfig = async (): Promise<Config | null> => {
 	const configPath = path.join(process.cwd(), CONFIG_FILE);
+
+	const isExists = await fs.exists(configPath);
+	if (!isExists) writeConfig({ localesPath: null });
+
 	const content = await fs.readFile(configPath, 'utf-8');
 
 	return JSON.parse(content);
