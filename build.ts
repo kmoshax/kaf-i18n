@@ -15,7 +15,7 @@ await $`rm -rf dist`.catch(() =>
 log.warn('building package ...', { icon: '📦' });
 
 const result = await Bun.build({
-	entrypoints: ['./src/index.ts', './src/cli.ts'],
+	entrypoints: ['./src/cli.ts'],
 	outdir: './dist',
 	target: 'bun',
 	splitting: true,

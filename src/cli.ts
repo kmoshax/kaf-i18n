@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 
 import { existsSync } from 'node:fs';
+
 import cac from 'cac';
 import prompts from 'prompts';
-import { logger } from '@/core/logger';
 
-import server from '@/server';
-import { readConfig, writeConfig } from './core/config';
-import { findLocalesPath } from './core/locales';
+import { readConfig, writeConfig } from '@/core/config';
+import { findLocalesPath } from '@/core/locales';
+import { logger } from '@/core/logger';
+import { startServer } from './server';
 
 const cli = cac('kaf-i18n');
 
@@ -51,17 +52,7 @@ cli
 		}
 
 		logger.success(`Serving translations from: ${localesPath}`, { icon: '📂' });
-
-		Bun.serve({
-			development: process.env.NODE_ENV === 'development',
-			port: options.port,
-			fetch: server.fetch,
-		});
-
-		logger.success(
-			`Web UI is running at http://localhost:${options.port} in ${process.env.NODE_ENV} mode`,
-			{ icon: '🎉' },
-		);
+		startServer(localesPath as string, 'en', options.port);
 	});
 
 cli.help();
