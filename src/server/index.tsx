@@ -12,7 +12,11 @@ import { saveLocalesHandler, translateHandler } from './handlers';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const publicRoot = path.join(__dirname, '..', 'public');
+const distRoot = path.join(__dirname, '..', 'dist');
+
+const clientBundelPath = path.join(distRoot, 'client.bundle.js');
 
 export const startServer = async (
 	path: string,
@@ -33,6 +37,9 @@ export const startServer = async (
 		}),
 	);
 
+	app.get('/favicon.ico', (c) => c.redirect('/public/favicon.ico'));
+	app.get('/client.bundle.js', serveStatic({ path: clientBundelPath }));
+
 	app.get('/', (c) => {
 		const initialData = { locales: localesData, baseLang: baseLang };
 
@@ -44,7 +51,6 @@ export const startServer = async (
 	api.post('/translate', translateHandler);
 	app.route('/api', api);
 
-	
 	Bun.serve({
 		development: process.env.NODE_ENV === 'development',
 		port: port,

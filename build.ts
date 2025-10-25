@@ -11,20 +11,30 @@ await $`rm -rf dist`.catch(() =>
 
 log.warn('building package ...', { icon: '📦' });
 
-const result = await Bun.build({
+const cliResult = await Bun.build({
 	entrypoints: ['./src/cli.ts'],
 	outdir: './dist',
-	target: 'bun',
+	target: 'node',
 	splitting: true,
 	minify: true,
 });
 
-if (!result.success) {
+const clientResult = await Bun.build({
+	entrypoints: ['./src/client/main.tsx'],
+	outdir: './dist',
+	target: 'browser',
+	splitting: true,
+	minify: true,
+});
+
+if (!cliResult.success || !clientResult.success) {
 	log.error('building failed', { icon: '❌' });
 
-	for (const message of result.logs) log.error(message);
+	for (const message of [...cliResult.logs, ...clientResult.logs]) log.error(message);
 
 	process.exit(1);
 }
+
+await $`mv dist/main.js public/js/client.bundle.js`;
 
 log.success('build successful!', { icon: '✅' });
