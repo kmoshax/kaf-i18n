@@ -8,6 +8,7 @@ import { loadLocales } from '@/core/locales';
 import { logger } from '@/core/logger';
 import { App } from '@/ui/app';
 import { renderer } from '@/ui/renderer';
+import { saveLocalesHandler, translateHandler } from './handlers';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +39,12 @@ export const startServer = async (
 		return c.render(<App initialData={initialData} />);
 	});
 
+	const api = new Hono();
+	api.post('/save', saveLocalesHandler);
+	api.post('/translate', translateHandler);
+	app.route('/api', api);
+
+	
 	Bun.serve({
 		development: process.env.NODE_ENV === 'development',
 		port: port,
