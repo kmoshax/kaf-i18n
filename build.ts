@@ -6,10 +6,7 @@ const log = logger.child({ prefix: 'build' });
 log.info('cleaning up old build...', { icon: '🧹' });
 
 await $`rm -rf dist`.catch(() =>
-	log.warn('can not remove old build files..', {
-		icon: '⚠️',
-		prefix: 'build',
-	}),
+	log.warn('can not remove old build files..', { icon: '⚠️' }),
 );
 
 log.warn('building package ...', { icon: '📦' });

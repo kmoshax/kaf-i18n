@@ -1,0 +1,4 @@
+/** biome-ignore-all lint/suspicious/noUnknownAtRules: css */
+@import "tailwindcss";
+
+@plugin "flyonui";

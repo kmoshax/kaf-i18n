@@ -11,7 +11,8 @@
 		"kaf-i18n": "dist/cli.js"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"public"
 	],
 	"scripts": {
 		"dev": "bun run src/cli.ts",
@@ -19,7 +20,9 @@
 		"prepublishOnly": "bun run build"
 	},
 	"dependencies": {
+		"@tailwindcss/cli": "^4.1.16",
 		"cac": "^6.7.14",
+		"flyonui": "^2.4.1",
 		"hono": "^4.10.2",
 		"picocolors": "^1.1.1",
 		"prompts": "^2.4.2"
@@ -27,7 +30,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.2.7",
 		"@types/bun": "latest",
-		"@types/prompts": "^2.4.9"
+		"@types/prompts": "^2.4.9",
+		"bun-plugin-tailwind": "^0.1.2",
+		"tailwindcss": "^4.1.16"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
