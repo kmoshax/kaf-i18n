@@ -2,9 +2,9 @@ import { render } from 'hono/jsx/dom';
 
 import { HeaderComponent } from './components/header';
 import { TranslationTable } from './components/translation-table';
-import { initializeState, subscribe, updateState } from './state';
+import { getState, initializeState, subscribe, updateState } from './state';
 
-import { redo, undo } from './undo-manager';
+import { pushToUndoStack, redo, undo } from './undo-manager';
 
 const initialDataEl = document.getElementById('initial-data');
 const initialData: InitialPayload = JSON.parse(
@@ -15,6 +15,17 @@ initializeState(initialData);
 
 const headerContainer = document.getElementById('header-container');
 const mainContentContainer = document.getElementById('main-content');
+
+const handleValueChange = (key: string, lang: string, value: string) => {
+  const currentLocales = getState().locales;
+
+  if (currentLocales[lang]?.[key] !== value) {
+    pushToUndoStack(currentLocales);
+    const newLocales = JSON.parse(JSON.stringify(currentLocales));
+    newLocales[lang][key] = value;
+    updateState({ locales: newLocales });
+  }
+}
 
 subscribe((state) => {
 	render(
@@ -28,10 +39,10 @@ subscribe((state) => {
 		headerContainer as HTMLElement,
 	);
 
-    render(
+  render(
     <TranslationTable
       state={state}
-      onValueChange={() => { /* TODO */ }}
+      onValueChange={handleValueChange}
       onDeleteKey={() => { /* TODO */ }}
       onAutoTranslate={() => { /* TODO */ }}
     />, 
