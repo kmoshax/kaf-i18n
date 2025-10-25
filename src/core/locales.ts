@@ -4,8 +4,6 @@ import path from 'node:path';
 
 import { logger } from '@/core/logger';
 
-export type LocaleData = Record<string, Record<string, string>>;
-
 export const commonPaths = ['locales', 'src/locales', 'public/locales'];
 
 export const isDirectory = async (path: string): Promise<boolean> => {

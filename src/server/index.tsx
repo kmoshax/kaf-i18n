@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 
+import { loadLocales } from '@/core/locales';
 import { logger } from '@/core/logger';
+import { App } from '@/ui/app';
 import { renderer } from '@/ui/renderer';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +20,10 @@ export const startServer = async (
 ) => {
 	const app = new Hono();
 
+	let localesData: LocaleData = await loadLocales(path);
+
+	app.use(renderer);
+
 	app.use(
 		'/public/*',
 		serveStatic({
@@ -26,21 +32,11 @@ export const startServer = async (
 		}),
 	);
 
-	app.use(renderer);
+	app.get('/', (c) => {
+		const initialData = { locales: localesData, baseLang: baseLang };
 
-	app.get('/', (c) =>
-		c.render(
-			<>
-				<p>Hiii</p>
-				<button type="button" className="btn">
-					Default
-				</button>
-				<button type="button" className="btn btn-primary">
-					Primary
-				</button>
-			</>,
-		),
-	);
+		return c.render(<App initialData={initialData} />);
+	});
 
 	Bun.serve({
 		development: process.env.NODE_ENV === 'development',
