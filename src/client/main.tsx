@@ -1,6 +1,6 @@
 import { render } from 'hono/jsx/dom';
 
-import { saveLocales } from './api';
+import { autoTranslate, saveLocales } from './api';
 import { showAddKeyModal } from './components/add-key-modal';
 import { HeaderComponent } from './components/header';
 import { TranslationTable } from './components/translation-table';
@@ -45,6 +45,22 @@ const handleValueChange = (key: string, lang: string, value: string) => {
 	}
 };
 
+const handleAutoTranslate = async (key: string, lang: string) => {
+	const { locales, baseLang } = getState();
+
+	const baseLangLocales = locales[baseLang as string];
+	if (!baseLangLocales || !baseLangLocales[key]) {
+		return alert('Base language text is empty.');
+	}
+	const textToTranslate = baseLangLocales[key];
+	try {
+		const translation = await autoTranslate(textToTranslate, lang, baseLang);
+		// ... update state with the new translation
+	} catch (_e) {
+		alert('Translation failed.');
+	}
+};
+
 subscribe((state) => {
 	render(
 		<HeaderComponent
@@ -64,9 +80,7 @@ subscribe((state) => {
 			onDeleteKey={() => {
 				/* TODO */
 			}}
-			onAutoTranslate={() => {
-				/* TODO */
-			}}
+			onAutoTranslate={handleAutoTranslate}
 		/>,
 		mainContentContainer as HTMLElement,
 	);
